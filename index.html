@@ -4,10 +4,39 @@
     <meta charset="UTF-8">
     <title></title>
     <link rel="stylesheet" href="style.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Special+Elite" rel="stylesheet">
     <script src="jquery.min.js"></script>
     <script src="main.js"></script>
 </head>
 <body>
-
+<div class="game-container">
+    <div class="header">
+        <h1>Simon Game</h1>
+        <img src="http://www.public-domain-photos.com/free-cliparts-1-big/electronics/bulb/lightbulb_jon_phillips_04.png"
+                class="lightbulb"/>
+        <div class="light light-yellow"></div>
+    </div>
+    <div class="start js-start overlay">
+        <p>Follow the pattern of lights and sounds for as long as you can.</p>
+        <label><input type="checkbox" value="first_checkbox"> Enable strict mode <br/>
+            <span class="instruction">No mercy! If you get a button press wrong, the game will restart.</span>
+        </label><br/>
+        <div class="btn-container">
+            <button class="js-start-btn">Start game</button>
+        </div>
+    </div>
+    <div class="inputs js-inputs ">
+        <div class="counter">0</div>
+        <div class="btn-container">
+            <button class="game-btn btn-red"></button>
+            <button class="game-btn btn-yellow"></button>
+            <button class="game-btn btn-green"></button>
+            <button class="game-btn btn-blue"></button>
+        </div>
+        <div class="btn-container">
+            <a href="#" class="js-reset">Reset game</a>
+        </div>
+    </div>
+</div>
 </body>
 </html>

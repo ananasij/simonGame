@@ -16,7 +16,8 @@ var Simon = function() {
     };
 };
 
-Simon.prototype.startGame = function() {
+Simon.prototype.startGame = function(strictmode) {
+    this.strictmode = strictmode;
     this.state = STATE_LOCKED;
     this.pattern = [];
     this.nextLevel();
@@ -87,8 +88,12 @@ function init() {
     sounds[CLR_BLUE] = new Audio('https://s3.amazonaws.com/freecodecamp/simonSound4.mp3');
 
     $('.js-start-btn').on('click', function() {
+        var strictmode = false;
+        if ($('.js-strictmode').is(':checked')) {
+            strictmode = true;
+        }
         switchViews();
-        simon.startGame();
+        simon.startGame(strictmode);
     });
 
     $('.js-reset').on('click', function(e) {
@@ -154,10 +159,14 @@ function updateCounter(value) {
 }
 
 function wrongGuess() {
-    updateCounter('Wrong!');
-    setTimeout(function() {
-        playPattern();
-    }, 1000);
+    if (simon.strictmode) {
+        updateCounter('Uh-oh! You lost...');
+    } else {
+        updateCounter('Wrong!');
+        setTimeout(function() {
+            playPattern();
+        }, 1000);
+    }
 }
 
 function endGame() {

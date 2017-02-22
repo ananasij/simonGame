@@ -5,12 +5,14 @@ var CLR_RED = 'CLR_RED';
 var CLR_YELLOW = 'CLR_YELLOW';
 var CLR_GREEN = 'CLR_GREEN';
 var CLR_BLUE = 'CLR_BLUE';
-var LEVELS_NUMBER = 'LEVELS_NUMBER';
+var LEVELS_LIMIT = 5;
 
 var Simon = function() {
     this.colors = [CLR_RED, CLR_YELLOW, CLR_GREEN, CLR_BLUE];
     this.callbacks = {
-        onNextLevel: null
+        onNextLevel: null,
+        onWrongGuess: null,
+        onGameEnd: null
     };
 };
 
@@ -21,7 +23,7 @@ Simon.prototype.startGame = function() {
 };
 
 Simon.prototype.endGame = function() {
-    console.log('end!!!');
+    this.trigger('onGameEnd');
 };
 
 Simon.prototype.getRandomColor = function() {
@@ -31,13 +33,12 @@ Simon.prototype.getRandomColor = function() {
 
 Simon.prototype.nextLevel = function() {
     this.state = STATE_LOCKED;
-    if (this.currentPosition === LEVELS_NUMBER) {
+    if (this.currentPosition === LEVELS_LIMIT) {
         this.endGame();
     } else {
         this.pattern.push(this.getRandomColor());
         console.log(this.pattern);
-        // this.trigger('onNextLevel');
-        playPattern();
+        this.trigger('onNextLevel');
     }
     this.currentPosition = 0;
 };
@@ -46,14 +47,19 @@ Simon.prototype.processInput = function(inputColor) {
     if (this.state === STATE_PLAY) {
         if (inputColor === this.pattern[this.currentPosition]) {
             this.currentPosition += 1;
-            console.log('correct!');
             if (this.currentPosition === this.pattern.length) {
                 this.nextLevel();
             }
         } else {
-            console.log('wrong!');
+            this.wrongGuess();
         }
     }
+};
+
+Simon.prototype.wrongGuess = function() {
+    this.state = STATE_LOCKED;
+    this.trigger('onWrongGuess');
+    this.currentPosition = 0;
 };
 
 Simon.prototype.on = function(eventName, callback) {
@@ -72,7 +78,9 @@ var sounds = {};
 
 function init() {
     simon = new Simon();
-    simon.on('onNextLevel', 'playPattern');
+    simon.on('onNextLevel', playPattern);
+    simon.on('onWrongGuess', wrongGuess);
+    simon.on('onGameEnd', endGame);
     sounds[CLR_RED] = new Audio('https://s3.amazonaws.com/freecodecamp/simonSound1.mp3');
     sounds[CLR_YELLOW] = new Audio('https://s3.amazonaws.com/freecodecamp/simonSound2.mp3');
     sounds[CLR_GREEN] = new Audio('https://s3.amazonaws.com/freecodecamp/simonSound3.mp3');
@@ -90,8 +98,10 @@ function init() {
 
     $('.js-color-btn').on('mousedown', function(e) {
         var $btn = $(e.target);
-        activateBtn($btn);
-        simon.processInput($btn.data('color'));
+        if (simon.state === STATE_PLAY) {
+            activateBtn($btn);
+            simon.processInput($btn.data('color'));
+        }
     });
 }
 
@@ -116,6 +126,8 @@ function playSound(color) {
 
 function playPattern() {
     var pattern = simon.pattern;
+    var level = pattern.length;
+    updateCounter(level);
     setTimeout(function() {
         loopColors(0);
     }, 700);
@@ -127,13 +139,29 @@ function playPattern() {
             color = pattern[counter];
             $btn = $('.js-' + color);
             activateBtn($btn);
-            if (counter === pattern.length - 1) {
+            if (counter === level - 1) {
                 simon.state = STATE_PLAY;
             } else {
                 loopColors(counter + 1);
             }
         }, 500);
     }
+}
+
+function updateCounter(value) {
+    var $counter = $('.js-counter');
+    $counter.text(value);
+}
+
+function wrongGuess() {
+    updateCounter('Wrong!');
+    setTimeout(function() {
+        playPattern();
+    }, 1000);
+}
+
+function endGame() {
+    updateCounter('Woo-hoo! You won!');
 }
 
 function getActiveClass(color) {

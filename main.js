@@ -113,12 +113,11 @@ function init() {
 
 function activateBtn($btn) {
     var color = $btn.data('color');
-    var activeClass = getActiveClass(color);
-    $btn.addClass(activeClass);
+    $btn.addClass('activated');
     lampBlink(color);
     playSound(color);
     setTimeout(function() {
-        $btn.removeClass(activeClass);
+        $btn.removeClass('activated');
     }, 300);
 }
 
@@ -174,21 +173,6 @@ function wrongGuess() {
 function endGame() {
     updateCounter('Woo-hoo! You won!');
     lampBlinkWin();
-}
-
-function getActiveClass(color) {
-    switch (color) {
-        case CLR_RED:
-            return 'btn-red-active';
-        case CLR_YELLOW:
-            return 'btn-yellow-active';
-        case CLR_GREEN:
-            return 'btn-green-active';
-        case CLR_BLUE:
-            return 'btn-blue-active';
-        default:
-            return null;
-    }
 }
 
 function lampBlink(color) {

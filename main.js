@@ -6,7 +6,7 @@ var CLR_RED = 'CLR_RED';
 var CLR_YELLOW = 'CLR_YELLOW';
 var CLR_GREEN = 'CLR_GREEN';
 var CLR_BLUE = 'CLR_BLUE';
-var LEVELS_LIMIT = 5;
+var LEVELS_LIMIT = 20;
 
 var Simon = function() {
     this.colors = [CLR_RED, CLR_YELLOW, CLR_GREEN, CLR_BLUE];
@@ -127,7 +127,10 @@ function switchViews() {
 }
 
 function playSound(color) {
-    sounds[color].play();
+    var sound = sounds[color];
+    sound.pause();
+    sound.currentTime = 0;
+    sound.play();
 }
 
 function playPattern() {

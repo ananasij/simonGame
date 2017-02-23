@@ -1,6 +1,7 @@
 // GAME LOGIC
 var STATE_PLAY = 'STATE_PLAY';
 var STATE_LOCKED = 'STATE_LOCKED';
+var STATE_OFF = 'STATE_OFF';
 var CLR_RED = 'CLR_RED';
 var CLR_YELLOW = 'CLR_YELLOW';
 var CLR_GREEN = 'CLR_GREEN';
@@ -38,7 +39,6 @@ Simon.prototype.nextLevel = function() {
         this.endGame();
     } else {
         this.pattern.push(this.getRandomColor());
-        console.log(this.pattern);
         this.trigger('onNextLevel');
     }
     this.currentPosition = 0;
@@ -99,6 +99,7 @@ function init() {
     $('.js-reset').on('click', function(e) {
         e.preventDefault();
         switchViews();
+        simon.state = STATE_OFF;
     });
 
     $('.js-color-btn').on('mousedown', function(e) {
@@ -114,6 +115,7 @@ function activateBtn($btn) {
     var color = $btn.data('color');
     var activeClass = getActiveClass(color);
     $btn.addClass(activeClass);
+    lampBlink(color);
     playSound(color);
     setTimeout(function() {
         $btn.removeClass(activeClass);
@@ -135,7 +137,7 @@ function playPattern() {
     updateCounter(level);
     setTimeout(function() {
         loopColors(0);
-    }, 700);
+    }, 500);
 
     function loopColors(counter) {
         setTimeout(function() {
@@ -159,18 +161,19 @@ function updateCounter(value) {
 }
 
 function wrongGuess() {
+    setTimeout(lampBlinkWrong, 500);
+
     if (simon.strictmode) {
         updateCounter('Uh-oh! You lost...');
     } else {
         updateCounter('Wrong!');
-        setTimeout(function() {
-            playPattern();
-        }, 1000);
+        setTimeout(playPattern, 1000);
     }
 }
 
 function endGame() {
     updateCounter('Woo-hoo! You won!');
+    lampBlinkWin();
 }
 
 function getActiveClass(color) {
@@ -186,6 +189,60 @@ function getActiveClass(color) {
         default:
             return null;
     }
+}
+
+function lampBlink(color) {
+    var $light = $('.js-light');
+    var lightClass = getLightClass(color);
+    $light.addClass(lightClass);
+    setTimeout(function() {
+        $light.removeClass(lightClass);
+    }, 300);
+}
+
+function getLightClass(color) {
+    switch (color) {
+        case CLR_RED:
+            return 'light-red';
+        case CLR_YELLOW:
+            return 'light-yellow';
+        case CLR_GREEN:
+            return 'light-green';
+        case CLR_BLUE:
+            return 'light-blue';
+        default:
+            return null;
+    }
+}
+
+function lampBlinkWin() {
+    var colors = [CLR_RED, CLR_YELLOW, CLR_GREEN, CLR_BLUE];
+    var position = 0;
+    loopBlinks(position);
+
+    function loopBlinks(colorPosition) {
+        var counter = colorPosition;
+        lampBlink(colors[counter]);
+        counter += 1;
+        if (counter === colors.length) {
+            counter = 0;
+        }
+        if (simon.state !== STATE_OFF) {
+            setTimeout(function() {
+                loopBlinks(counter);
+            }, 400);
+        }
+    }
+}
+
+function lampBlinkWrong() {
+    var $light = $('.js-light');
+    var lightClass = getLightClass(CLR_RED);
+    $light.addClass(lightClass);
+    $light.effect('pulsate', 'slow');
+    setTimeout(function() {
+        $light.removeClass(lightClass);
+    }, 500);
 }
 
 $(document).ready(init);
